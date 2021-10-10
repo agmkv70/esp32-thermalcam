@@ -26,8 +26,8 @@ public:
   }
 
 private:
-  float inputVariance = 0.f;  
   float varianceProcess = 1e-8;
+  float inputVariance = 0.f;  
   float Pc = 0.0;
   float G = 0.0;
   float P = 1.0;

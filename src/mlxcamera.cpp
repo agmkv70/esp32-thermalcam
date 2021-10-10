@@ -56,11 +56,14 @@ bool MLXCamera::init()
   status = MLX90640_ExtractParameters(eeMLX90640, &mlx90640);
   if (status != 0)
   {
-    Serial.println("Parameter extraction failed");
-    return false;
+    Serial.print("Parameter extraction failed: status = "); //gives error = -610 ()
+    Serial.println(status);
+    //return false;
   }
 
   MLX90640_SetChessMode(MLX90640_address);
+  //MLX90640_SetInterleavedMode(MLX90640_address);
+
   status = MLX90640_SetRefreshRate(MLX90640_address, 0x05); // Set rate to 8Hz effective - Works at 800kHz
   if (status != 0)
   {
@@ -172,7 +175,7 @@ void MLXCamera::readPixels()
     
     MLX90640_CalculateTo(mlx90640Frame, &mlx90640, SensorEmissivity, tr, measuredPixels.data());
 
-    Serial.printf(" Calculate: %d\n", millis() - start);
+    //Serial.printf(" Calculate: %ld\n", millis() - start);
   }
 }
 
@@ -280,7 +283,7 @@ void MLXCamera::drawImage(const float *pixelData, int width, int height, int sca
     }
   }
 
-  Serial.printf("Draw: %d\n", millis() - start);
+  //Serial.printf("Draw: %ld\n", millis() - start);
 }
 
 void MLXCamera::denoiseRawPixels(const float smoothingFactor)
@@ -290,7 +293,7 @@ void MLXCamera::denoiseRawPixels(const float smoothingFactor)
   for (int i = 0; i < SensorWidth * SensorHeight; i++)
       filteredPixels[i] = filterExponentional(measuredPixels[i], filteredPixels[i], smoothingFactor);
 
-  Serial.printf("Denoising: %d ", millis() - start);
+  //Serial.printf("Denoising: %ld ", millis() - start);
 }
 
 void MLXCamera::interpolateImage(InterpolationType interpolationType)
@@ -302,7 +305,7 @@ void MLXCamera::interpolateImage(InterpolationType interpolationType)
   else
     interpolate_image_bicubic(filteredPixels.data(), SensorHeight, SensorWidth, upscaledPixels.data(), UpScaledHeight, UpScaledWidth, UpScaleFactor);
 
-  Serial.printf("Interpolation: %d ", millis() - start);
+  //Serial.printf("Interpolation: %ld ", millis() - start);
 }
 
 void MLXCamera::drawImage(InterpolationType interpolationType)
@@ -311,12 +314,12 @@ void MLXCamera::drawImage(InterpolationType interpolationType)
 
   if (interpolationType == InterpolationType::eNone)
   {
-    drawImage(filteredPixels.data(), SensorWidth, SensorHeight, 9);
+    drawImage(filteredPixels.data(), SensorWidth, SensorHeight, 4);
   }
   else
   {
     interpolateImage(interpolationType);    
-    drawImage(upscaledPixels.data(), UpScaledWidth, UpScaledHeight, 3);
+    drawImage(upscaledPixels.data(), UpScaledWidth, UpScaledHeight, 1);
   }
 }
 
@@ -342,8 +345,8 @@ void MLXCamera::drawLegendText() const
 
 void MLXCamera::drawCenterMeasurement() const
 {
-  const int32_t centerX = SensorWidth  * 9 / 2;
-  const int32_t centerY = SensorHeight * 9 / 2 + 20 - 1;
+  const int32_t centerX = SensorWidth  * 4 / 2;
+  const int32_t centerY = SensorHeight * 4 / 2 + 20 - 1;
   const int32_t halfCrossSize = 3; 
   tft.drawFastHLine(centerX - halfCrossSize, centerY, 2 * halfCrossSize + 1, TFT_WHITE);
   tft.drawFastVLine(centerX, centerY - halfCrossSize, 2 * halfCrossSize + 1, TFT_WHITE);
@@ -352,7 +355,7 @@ void MLXCamera::drawCenterMeasurement() const
   const int32_t legendPixelLength = tft.height() - 25 - 25;
   const int32_t centerOffset = mapf(avgCenterTemperature, minTemp, maxTemp, 0, legendPixelLength);
   
-  const int32_t positionX = 296; //tft.width() - legendSize - 6
+  const int32_t positionX = tft.width() - 25 - 6; //196
   const int32_t positionY = tft.height() - 15 - centerOffset;
 
   const int32_t height = 6;
@@ -375,4 +378,11 @@ void MLXCamera::drawCenterMeasurement() const
   y2 = positionY + (height / 2);
   
   tft.fillTriangle(x0, y0, x1, y1, x2, y2, TFT_WHITE);
+
+  tft.setTextFont(1);
+  tft.setTextSize(2);
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.setCursor(tft.width() - 50, 10);
+  tft.print(String(avgCenterTemperature).substring(0, 4));
+ 
 }

@@ -61,7 +61,7 @@ private:
     std::array<float, SensorWidth * SensorHeight> measuredPixels;
     std::array<float, SensorWidth * SensorHeight> filteredPixels;
 
-    static constexpr int UpScaleFactor  = 3;
+    static constexpr int UpScaleFactor  = 4;
     static constexpr int UpScaledWidth  = (SensorWidth  - 1) * UpScaleFactor + 1;
     static constexpr int UpScaledHeight = (SensorHeight - 1) * UpScaleFactor + 1;
     std::array<float, UpScaledWidth * UpScaledHeight> upscaledPixels;
