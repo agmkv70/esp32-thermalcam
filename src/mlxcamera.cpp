@@ -182,7 +182,7 @@ void MLXCamera::readPixels()
 uint16_t MLXCamera::getFalseColor(float value) const
 {
     // Heatmap code borrowed from: http://www.andrewnoske.com/wiki/Code_-_heatmaps_and_color_gradients
-    static float color[][3] = { {0,0,0}, {0,0,255}, {0,255,0}, {255,255,0}, {255,0,0}, {255,0,255} };
+    static float color[][3] = { {0,0,0}, {0,0,255}, {0,255,0}, {255,255,0}, {255,0,0}, {255,255,255} };
 //    static const float color[][3] = { {0,0,20}, {0,0,100}, {80,0,160}, {220,40,180}, {255,200,20}, {255,235,20}, {255,255,255} };
 
     static const int NUM_COLORS = sizeof(color) / sizeof(color[0]);
@@ -319,7 +319,7 @@ void MLXCamera::drawImage(InterpolationType interpolationType)
   else
   {
     interpolateImage(interpolationType);    
-    drawImage(upscaledPixels.data(), UpScaledWidth, UpScaledHeight, 1);
+    drawImage(upscaledPixels.data(), UpScaledWidth, UpScaledHeight, 2);
   }
 }
 
