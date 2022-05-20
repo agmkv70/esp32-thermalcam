@@ -191,9 +191,7 @@ uint16_t MLXCamera::getFalseColor(float value) const
     if(value <= 0.f)
     {
       return tft.color565(color[0][0], color[0][1], color[0][2]);
-    }
-      
-    if(value >= 1.f)
+    }else if(value >= 1.f)
     {
       return tft.color565(color[NUM_COLORS-1][0], color[NUM_COLORS-1][1], color[NUM_COLORS-1][2]);
     }
@@ -260,6 +258,22 @@ void MLXCamera::setTempScale()
   const auto minmax = std::minmax_element(filteredPixels.begin(), filteredPixels.end());
   minTemp = *minmax.first;
   maxTemp = *minmax.second;
+
+  //_nik: //////////////not too narrow - min 10 deg C
+  float minDelta = 10.f;
+  float tempCenter = 30.f;
+  if(maxTemp-minTemp < minDelta){
+    float corrCenter = ( tempCenter - (maxTemp-minTemp)/2.f )/20.f;
+    if(corrCenter<-1.f){
+      corrCenter=-1.f;
+    }else if(corrCenter>1.f){
+      corrCenter=1.f;
+    }
+    corrCenter = (1.f-corrCenter)/2.f; //change sign and normalize: [0..1]
+    float add = minDelta-(maxTemp-minTemp);
+    minTemp = minTemp - add*corrCenter;
+    maxTemp = maxTemp + add*(1.f-corrCenter);
+  }
   
   setAbcd();
 }
@@ -279,7 +293,7 @@ void MLXCamera::drawImage(const float *pixelData, int width, int height, int sca
     
   for (int y=0; y<height; y++) {
     for (int x=0; x<width; x++) {
-      tft.fillRect(tft.cursor_x + x*scale, tft.cursor_y + 10 + y*scale, scale, scale, getFalseColor(pixelData[(width-1-x) + (y*width)]));
+      tft.fillRect(tft.cursor_x + x*scale, tft.cursor_y + y*scale, scale, scale, getFalseColor(pixelData[(width-1-x) + (y*width)]));
     }
   }
 
