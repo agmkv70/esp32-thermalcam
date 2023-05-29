@@ -64,7 +64,7 @@ bool MLXCamera::init()
   MLX90640_SetChessMode(MLX90640_address);
   //MLX90640_SetInterleavedMode(MLX90640_address);
 
-  status = MLX90640_SetRefreshRate(MLX90640_address, 0x05); // Set rate to 8Hz effective - Works at 800kHz
+  status = MLX90640_SetRefreshRate(MLX90640_address, 0x04); // Set rate to 8Hz effective - Works at 800kHz
   if (status != 0)
   {
     Serial.println("SetRefreshRate failed");
@@ -260,7 +260,7 @@ void MLXCamera::setTempScale()
   maxTemp = *minmax.second;
 
   //_nik: //////////////not too narrow - min 10 deg C
-  float minDelta = 10.f;
+  /*float minDelta = 10.f;
   float tempCenter = 30.f;
   if(maxTemp-minTemp < minDelta){
     float corrCenter = ( tempCenter - (maxTemp-minTemp)/2.f )/20.f;
@@ -273,7 +273,7 @@ void MLXCamera::setTempScale()
     float add = minDelta-(maxTemp-minTemp);
     minTemp = minTemp - add*corrCenter;
     maxTemp = maxTemp + add*(1.f-corrCenter);
-  }
+  }*/
   
   setAbcd();
 }
