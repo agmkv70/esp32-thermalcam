@@ -151,7 +151,7 @@ void MLXCamera::readImage()
 
 void MLXCamera::readPixels()
 {
-  for (byte x = 0 ; x < 2 ; x++) //Read both subpages
+  /*for (byte x = 0 ; x < 2 ; x++) //Read both subpages
   {
     uint16_t mlx90640Frame[834];
     int status = MLX90640_GetFrameData(MLX90640_address, mlx90640Frame);
@@ -176,7 +176,40 @@ void MLXCamera::readPixels()
     MLX90640_CalculateTo(mlx90640Frame, &mlx90640, SensorEmissivity, tr, measuredPixels.data());
 
     //Serial.printf(" Calculate: %ld\n", millis() - start);
+  }*/
+
+  uint16_t mlx90640Frame0[834];
+  int status = MLX90640_GetFrameData(MLX90640_address, mlx90640Frame0);
+  if (status < 0)
+  { if (status == -8)
+    { // Could not aquire frame data in certain time, I2C frequency may be too low
+      Serial.println("GetFrame Error: could not aquire frame data in time");
+    }else{
+      Serial.printf("GetFrame Error: %d\n", status);
+    }
   }
+  //uint16_t mlx90640Frame1[834];
+  status = MLX90640_GetFrameData(MLX90640_address, mlx90640Frame0);
+  if (status < 0)
+  { if (status == -8)
+    { // Could not aquire frame data in certain time, I2C frequency may be too low
+      Serial.println("GetFrame Error: could not aquire frame data in time");
+    }else{
+      Serial.printf("GetFrame Error: %d\n", status);
+    }
+  }
+
+  //const long start = millis(); 
+  
+  const float Ta0 = MLX90640_GetTa(mlx90640Frame0, &mlx90640);    
+  const float tr0 = Ta0 - TA_SHIFT; //Reflected temperature based on the sensor ambient temperature  
+
+  //const float Ta1 = MLX90640_GetTa(mlx90640Frame1, &mlx90640);    
+  //const float tr1 = Ta1 - TA_SHIFT; //Reflected temperature based on the sensor ambient temperature  
+  
+  MLX90640_CalculateTo(mlx90640Frame0, &mlx90640, SensorEmissivity, tr0, measuredPixels.data());
+  //MLX90640_CalculateTo(mlx90640Frame1, &mlx90640, SensorEmissivity, (tr0+tr1)/2, measuredPixels.data());
+
 }
 
 uint16_t MLXCamera::getFalseColor(float value) const
